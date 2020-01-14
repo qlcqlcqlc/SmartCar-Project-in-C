@@ -1,135 +1,128 @@
 
 /******************************************************************************/
-/*----------------------------------ÒýÓÃ---------------------------------------*/
+/*----------------------------------å¼•ç”¨---------------------------------------*/
 /******************************************************************************/
 #include "UserSource.h"
 #include "ServeSource.h"
 int timecounter10=0;
 
 /******************************************************************************/
-/*---------------------------------ÓÃ»§±äÁ¿¶¨Òå-----------------------------------*/
+/*---------------------------------ç”¨æˆ·å˜é‡å®šä¹‰-----------------------------------*/
 /******************************************************************************/
 uint8 ctldata=0;
 int CodePerid;
 float distance;
 /******************************************************************************/
-/*----------------------------------ÓÃ»§º¯Êý------------------------------------*/
+/*----------------------------------ç”¨æˆ·å‡½æ•°------------------------------------*/
 /******************************************************************************/
-//º¯Êý¼°º¯ÊýÓÃ·¨
-void motor_duty(int duty)//ÑùÀýÓÃ»§×ÔÉí¶æ»úº¯Êý
+//å‡½æ•°åŠå‡½æ•°ç”¨æ³•
+void motor_duty(int duty)//æ ·ä¾‹ç”¨æˆ·è‡ªèº«èˆµæœºå‡½æ•°
 {
-	if (duty>0)
-		SetMotor(FORWARD, duty);
-	else
-		SetMotor(BACKWARD, -duty);
+    if (duty>0)
+        SetMotor(FORWARD, duty);
+    else
+        SetMotor(BACKWARD, -duty);
 }
 void steer_angle(int duty)
 {
-	if (duty>0)
-		SetSteer(LEFT, duty);
-	else if(duty<0)
-		SetSteer(RIGHT, -duty);
-	else
-		SetSteer(MIDDLE, duty);
+    if (duty>0)
+        SetSteer(LEFT, duty);
+    else if(duty<0)
+        SetSteer(RIGHT, -duty);
+    else
+        SetSteer(MIDDLE, duty);
 }
 
-/*****************************Ö÷º¯Êý***********************************/
-//CPU0Ö÷º¯Êý£¬ÖÃÓÚÑ­»·ÖÐÓÃ»§Ö÷ÒªÂß¼­¼ÆËãÇø
-void UserCpu0Main(void) //ÑùÀý£ºÀ¶ÑÀÒ£¿ØÐ¡³µ
+/*****************************ä¸»å‡½æ•°***********************************/
+//CPU0ä¸»å‡½æ•°ï¼Œç½®äºŽå¾ªçŽ¯ä¸­ç”¨æˆ·ä¸»è¦é€»è¾‘è®¡ç®—åŒº
+void UserCpu0Main(void) //æ ·ä¾‹ï¼šè“ç‰™é¥æŽ§å°è½¦
 {
-	uint8 a=0;
-	int myduty=0,myangle=0;
-	motor_duty(myduty);
-	steer_angle(myangle);
-	while(TRUE)
-	{
-		a=Bluetooth_Read_Data();
-		if (a!=0)
-			ctldata=a;
-		switch (ctldata)
-		{
-		case 'W':
-			myduty++;
-			ctldata='w';
-			motor_duty(myduty);
-			steer_angle(myangle);
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'S':
-			myduty--;
-			ctldata='s';
-			motor_duty(myduty);
-			steer_angle(myangle);
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'A':
-			myangle+=2;
-			ctldata='a';
-			motor_duty(myduty);
-			steer_angle(myangle);
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'D':
-			myangle-=2;
-			ctldata='d';
-			motor_duty(myduty);
-			steer_angle(myangle);
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'E':
-			myangle=0;
-			myduty=0;
-			ctldata='e';
-			motor_duty(myduty);
-			steer_angle(myangle);
-			Bluetooth_Send_Data(ctldata);
+    uint8 a=0;
+    int myduty=0,myangle=0;
+    motor_duty(myduty);
+    steer_angle(myangle);
+    while(TRUE)
+    {
+        a=Bluetooth_Read_Data();
+        if (a!=0)
+            ctldata=a;
+        switch (ctldata)
+        {
+            case 'W': // å¤§å†™Wä¸ºå–·å°„èµ·æ­¥
+                myduty=80;
+                ctldata='W';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+            case 'w': // é€Ÿåº¦20æ¸å¢ž
+                myduty+=20;
+                ctldata='w';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+            case 's': // é€Ÿåº¦20æ¸å‡
+                myduty-=20;
+                ctldata='s';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+            case 'a': // è§’åº¦å¢žåŠ 20
+                myangle+=20; // æ— å¤ä½æ“ä½œï¼ï¼ï¼
+                ctldata='a';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+            case 'd': // è§’åº¦å‡å°‘20
+                myangle-=20; // æ— å¤ä½æ“ä½œï¼ï¼ï¼
+                ctldata='d';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+            case '/': // æ€¥åˆ¹è½¦
+                myduty=0;
+                ctldata='W';
+                motor_duty(myduty);
+                steer_angle(myangle);
+                Bluetooth_Send_Data(ctldata);
+                break;
+                
+                //å¯ä»¥æŠŠQå’ŒEè®¾ç½®ä¸ºç‰¹å®šåŠå¾„åœ†çš„è‡ªåŠ¨è½¬åœˆ
+        }
 
-			break;
-		case 'Z':
-			ctldata='z';
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'X':
-			ctldata='x';
-			Bluetooth_Send_Data(ctldata);
-			break;
-		case 'C':
-			ctldata='c';
-			Bluetooth_Send_Data(ctldata);
-			break;
-		default:
-			break;
-		}
-
-	}
+    }
 }
-//CPU1Ö÷º¯Êý£¬ÖÃÓÚÑ­»·ÖÐ£¬ÉãÏñÍ·¶ÁÐ´ÓÉ´ËºË´¦Àí£¬½¨ÒéÓÃÓÚÉãÏñÍ·Ïà¹Ø¼ÆËã£º
-//²»ÒªÐ´³ÉËÀÑ­»·£¬ºóÃæÓÐADÏà¹Ø´¦Àí
+//CPU1ä¸»å‡½æ•°ï¼Œç½®äºŽå¾ªçŽ¯ä¸­ï¼Œæ‘„åƒå¤´è¯»å†™ç”±æ­¤æ ¸å¤„ç†ï¼Œå»ºè®®ç”¨äºŽæ‘„åƒå¤´ç›¸å…³è®¡ç®—ï¼š
+//ä¸è¦å†™æˆæ­»å¾ªçŽ¯ï¼ŒåŽé¢æœ‰ADç›¸å…³å¤„ç†
 void UserCpu1Main(void)
 {
 
 }
-/**************************************ÖÐ¶Ïµ÷ÓÃº¯Êý****************************************/
-//¸Ãº¯ÊýÃ¿10msÖ´ÐÐÒ»´Î£¬ÇëÔÚ¸Ãº¯ÊýÖÐÊéÐ´³ÌÐò£¬ÖÐ¶ÏÊ±¼äÓÐÏÞ£¬²»ÒªÌ«³¤
+/**************************************ä¸­æ–­è°ƒç”¨å‡½æ•°****************************************/
+//è¯¥å‡½æ•°æ¯10msæ‰§è¡Œä¸€æ¬¡ï¼Œè¯·åœ¨è¯¥å‡½æ•°ä¸­ä¹¦å†™ç¨‹åºï¼Œä¸­æ–­æ—¶é—´æœ‰é™ï¼Œä¸è¦å¤ªé•¿
 uint32 UserInterupt10ms(void)
 {
-	return 0;
+    return 0;
 }
-//¸Ãº¯ÊýÃ¿100msÖ´ÐÐÒ»´Î£¬ÇëÔÚ¸Ãº¯ÊýÖÐÊéÐ´³ÌÐò£¬ÖÐ¶ÏÊ±¼äÓÐÏÞ£¬²»ÒªÌ«³¤
-//ÑùÀý£¬»ñÈ¡±àÂëÆ÷Êä³öÆµÂÊÓë³¬Éù¾ÙÀý
+//è¯¥å‡½æ•°æ¯100msæ‰§è¡Œä¸€æ¬¡ï¼Œè¯·åœ¨è¯¥å‡½æ•°ä¸­ä¹¦å†™ç¨‹åºï¼Œä¸­æ–­æ—¶é—´æœ‰é™ï¼Œä¸è¦å¤ªé•¿
+//æ ·ä¾‹ï¼ŒèŽ·å–ç¼–ç å™¨è¾“å‡ºé¢‘çŽ‡ä¸Žè¶…å£°ä¸¾ä¾‹
 uint32 UserInterupt100ms(void)
 {
-	distance=get_echo_length();
-	CodePerid=GetCodePerid();
-	return 0;
+    distance=get_echo_length();
+    CodePerid=GetCodePerid();
+    return 0;
 }
-//¸Ãº¯ÊýÃ¿1000msÖ´ÐÐÒ»´Î£¬ÇëÔÚ¸Ãº¯ÊýÖÐÊéÐ´³ÌÐò£¬ÖÐ¶ÏÊ±¼äÓÐÏÞ£¬²»ÒªÌ«³¤
+//è¯¥å‡½æ•°æ¯1000msæ‰§è¡Œä¸€æ¬¡ï¼Œè¯·åœ¨è¯¥å‡½æ•°ä¸­ä¹¦å†™ç¨‹åºï¼Œä¸­æ–­æ—¶é—´æœ‰é™ï¼Œä¸è¦å¤ªé•¿
 uint32 UserInterupt1000ms(void)
 {
-	return 0;
+    return 0;
 }
 
 void UserInteruptIO(void)
 {
-	IfxPort_togglePin(LED1);
+    IfxPort_togglePin(LED1);
 }
