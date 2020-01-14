@@ -4,6 +4,7 @@
 /******************************************************************************/
 #include "UserSource.h"
 #include "ServeSource.h"
+#include <stdio.h>
 int timecounter10=0;
 
 /******************************************************************************/
@@ -32,6 +33,60 @@ void steer_angle(int duty)
     else
         SetSteer(MIDDLE, duty);
 }
+
+/*****************************滤波算法*********************************/
+//对于电磁传感器的误差可以采取的滤波算法
+void average_filter(void)
+{
+
+}
+
+/*****************************电磁采集*********************************/
+//磁场数据采样
+
+VADC_init(void);
+
+void VADCresult_run(void)
+{
+    int i, j;
+    int arr[9][9];
+    for (i = 0; i < 9; i ++)
+    {
+        for (j = 0; j < 9; j ++)
+        {
+            arr[i][j] = 0;
+        }
+    }
+    // wait for valid result
+    Ifx_VADC_RES conversionResult;
+    // start scan
+    IfxVadc_Adc_startScan(&adcGroup);
+    // check results
+    int chnIx;
+    i = 0;
+    while (i < 9)
+    {
+        for(chnIx=0; chnIx<9; chnIx++) {
+            do {
+                conversionResult = IfxVadc_Adc_getResult(&adcChannel[chnIx]);
+            } while( !conversionResult.B.VF );
+            VADCresult[chnIx]=conversionResult.B.RESULT;
+            arr[i][chnIx] = VADCresult[chnIx];
+        }
+        i ++;
+        sleep(10);
+    }
+    for (i = 0; i < 9; i ++)
+    {
+        for (j = 0; j < 9; j ++)
+        {
+            printf("%d ", arr[i][j]);
+        }
+        printf('\n');
+    }
+    printf("The End of Result");
+}
+
 
 /*****************************主函数***********************************/
 //CPU0主函数，置于循环中用户主要逻辑计算区
@@ -90,7 +145,7 @@ void UserCpu0Main(void) //样例：蓝牙遥控小车
                 steer_angle(myangle);
                 Bluetooth_Send_Data(ctldata);
                 break;
-                
+
                 //可以把Q和E设置为特定半径圆的自动转圈
         }
 
