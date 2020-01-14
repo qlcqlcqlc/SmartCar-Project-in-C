@@ -4,6 +4,8 @@
 /******************************************************************************/
 #include "UserSource.h"
 #include "ServeSource.h"
+#include <stdio.h>
+#include <stdlib.h>
 int timecounter10=0;
 
 /******************************************************************************/
@@ -31,6 +33,22 @@ void steer_angle(int duty)
         SetSteer(RIGHT, -duty);
     else
         SetSteer(MIDDLE, duty);
+}
+
+/*****************************滤波算法*********************************/
+//对于电磁传感器的误差可以采取的滤波算法
+void avg_filter(void)
+{
+    // Read multiple set of data to get average values
+    int arr_sum[8] = {0,0,0,0,0,0,0,0}, i;
+    for (i = 0; i < 8; i ++)
+    {
+        arr_sum[i] += VADCresult_run();
+    }
+    for (i = 0; i < 8; i ++)
+    {
+        printf("%d ", arr_sum[i]/8);
+    }
 }
 
 /*****************************主函数***********************************/
@@ -90,7 +108,7 @@ void UserCpu0Main(void) //样例：蓝牙遥控小车
                 steer_angle(myangle);
                 Bluetooth_Send_Data(ctldata);
                 break;
-                
+
                 //可以把Q和E设置为特定半径圆的自动转圈
         }
 
