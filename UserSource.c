@@ -43,17 +43,17 @@ void steer_angle(int duty)
 int* avg_filter(void) // 5次测量取平均值
 {
     // Read multiple set of data to get average values
-    int arr_data[8], i;
+    int arr_data[8] = {0,0,0,0,0,0,0,0}, i, *p;
     for (i = 0; i < 8; i ++)
     {
         arr_sum[i] = 0;
     }
     for (i = 0; i < 12; i ++)
     {
-        arr_data = VADCresult_run();
+        p = VADCresult_run();
         for (j = 0; j < 8; j ++)
         {
-            arr_sum[j] += arr_data[j];
+            arr_sum[j] += p[j];
         }
     }
     for (i = 0; i < 8; i ++)
