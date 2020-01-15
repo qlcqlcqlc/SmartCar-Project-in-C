@@ -67,7 +67,7 @@ int* avg_filter(void) // 5次测量取平均值
 // 无PID,无特殊位置决策
 void run(void)
 {
-    motor_duty(80); // 匀速80行驶
+    motor_duty(60); // 匀速80行驶
     avg_filter();
     // 正常行驶
     if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
