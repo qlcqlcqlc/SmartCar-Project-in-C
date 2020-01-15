@@ -1,7 +1,7 @@
 /*
  * VadcApp.h
  *
- *  Created on: 2017Äê12ÔÂ8ÈÕ
+ *  Created on: 2017ï¿½ï¿½12ï¿½ï¿½8ï¿½ï¿½
  *      Author: Administrator
  */
 
@@ -10,6 +10,6 @@
 #include "Vadc/Adc/IfxVadc_Adc.h"
 #include "IfxVadc_regdef.h"
 void VADC_init(void);
-extern void  VADCresult_run(void);//»ñÈ¡AD½á¹û
-extern unsigned int  VADCresult[9];//AD½á¹û´æ´¢Î»ÖÃ 0.0---0.8 AN0....AN8
+extern void VADCresult_run(void);//ï¿½ï¿½È¡ADï¿½ï¿½ï¿½
+extern unsigned int  VADCresult[9];//ADï¿½ï¿½ï¿½ï¿½æ´¢Î»ï¿½ï¿½ 0.0---0.8 AN0....AN8
 #endif /* 0_SRC_0_APPSW_TRICORE_API_VADC_VADCAPP_H_ */
