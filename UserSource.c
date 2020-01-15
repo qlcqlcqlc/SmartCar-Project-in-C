@@ -90,7 +90,7 @@ void UserCpu0Main(void) //样例：蓝牙遥控小车
 {
     while(1)
     {
-        run(void);
+        run();
     }
 }
 //CPU1主函数，置于循环中，摄像头读写由此核处理，建议用于摄像头相关计算：
