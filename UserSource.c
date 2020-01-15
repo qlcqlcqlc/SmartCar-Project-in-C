@@ -83,7 +83,6 @@ void run(void)
         steer_angle(0);
     }
     // 特殊位置
-    if ()
     sleep(50); //单次执行时间为100ms
 }
 
