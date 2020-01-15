@@ -78,7 +78,7 @@ void run(void)
     {
         motor_duty(-30);
         steer_angle(100);
-    }  
+    }
     else if (arr_sum[3] > arr_sum[2] + 1000)
     {
         motor_duty(-40);
@@ -86,7 +86,7 @@ void run(void)
     }
     else if (arr_sum[3] > arr_sum[2] + 1600)
     {
-        motor_duty(-60);
+        motor_duty(-30);
         steer_angle(-100);
     }
     else
