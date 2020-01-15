@@ -50,10 +50,10 @@ int* avg_filter(void) // 5次测量取平均值
     }
     for (i = 0; i < 12; i ++)
     {
-        p = VADCresult_run();
+        VADCresult_run();
         for (j = 0; j < 8; j ++)
         {
-            arr_sum[j] += p[j];
+            arr_sum[j] += VADCresult[j+1];
         }
     }
     for (i = 0; i < 8; i ++)
@@ -69,6 +69,7 @@ void run(void)
 {
     motor_duty(80); // 匀速80行驶
     avg_filter();
+    // 正常行驶
     if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
     {
         steer_angle(20);
@@ -81,7 +82,9 @@ void run(void)
     {
         steer_angle(0);
     }
-    sleep(100); //单次执行时间为100ms
+    // 特殊位置
+    if ()
+    sleep(50); //单次执行时间为100ms
 }
 
 /*****************************主函数***********************************/
