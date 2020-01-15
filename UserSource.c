@@ -14,6 +14,7 @@ int timecounter10=0;
 uint8 ctldata=0;
 int CodePerid;
 float distance;
+int i, j;
 /******************************************************************************/
 /*----------------------------------用户函数------------------------------------*/
 /******************************************************************************/
@@ -37,81 +38,54 @@ void steer_angle(int duty)
 
 /*****************************滤波算法*********************************/
 //对于电磁传感器的误差可以采取的滤波算法
-void avg_filter(void)
+int* avg_filter(void) // 5次测量取平均值
 {
     // Read multiple set of data to get average values
-    int arr_sum[8] = {0,0,0,0,0,0,0,0}, i;
-    for (i = 0; i < 8; i ++)
+    int arr_sum[8] = {0,0,0,0,0,0,0,0}, arr_data[8], i;
+    for (i = 0; i < 12; i ++)
     {
-        arr_sum[i] += VADCresult_run();
+        arr_data = VADCresult();
+        for (j = 0; j < 8; j ++)
+        {
+            arr_sum[j] += arr_data[j];
+        }
     }
     for (i = 0; i < 8; i ++)
     {
-        printf("%d ", arr_sum[i]/8);
+        arr_sum[i] = arr_sum[i] / 12;
     }
+    return arr_sum;
+}
+
+/*****************************电机驱动*********************************/
+// 无PID,无特殊位置决策
+void run(void)
+{
+    int filtered_arr[8];
+    motor_duty(80); // 匀速80行驶
+    filtered_arr = avg_filter();
+    if (filtered_arr[2] > filtered_arr[3] + 1000) //转向阈值为1000
+    {
+        steer_angle(20);
+    }
+    else (filtered_arr[3] > filtered_arr[2] + 1000)
+    {
+        steer_angle(-20);
+    }
+    else
+    {
+        steer_angle(0);
+    }
+    sleep(100); //单次执行时间为100ms
 }
 
 /*****************************主函数***********************************/
 //CPU0主函数，置于循环中用户主要逻辑计算区
 void UserCpu0Main(void) //样例：蓝牙遥控小车
 {
-    uint8 a=0;
-    int myduty=0,myangle=0;
-    motor_duty(myduty);
-    steer_angle(myangle);
-    while(TRUE)
+    while(1)
     {
-        a=Bluetooth_Read_Data();
-        if (a!=0)
-            ctldata=a;
-        switch (ctldata)
-        {
-            case 'W': // 大写W为喷射起步
-                myduty=80;
-                ctldata='W';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-            case 'w': // 速度20渐增
-                myduty+=20;
-                ctldata='w';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-            case 's': // 速度20渐减
-                myduty-=20;
-                ctldata='s';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-            case 'a': // 角度增加20
-                myangle+=20; // 无复位操作！！！
-                ctldata='a';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-            case 'd': // 角度减少20
-                myangle-=20; // 无复位操作！！！
-                ctldata='d';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-            case '/': // 急刹车
-                myduty=0;
-                ctldata='W';
-                motor_duty(myduty);
-                steer_angle(myangle);
-                Bluetooth_Send_Data(ctldata);
-                break;
-
-                //可以把Q和E设置为特定半径圆的自动转圈
-        }
-
+        run(void);
     }
 }
 //CPU1主函数，置于循环中，摄像头读写由此核处理，建议用于摄像头相关计算：
