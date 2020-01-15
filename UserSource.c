@@ -7,6 +7,7 @@
 #include "VadcApp.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 int timecounter10=0;
 
 /******************************************************************************/
@@ -16,13 +17,18 @@ uint8 ctldata=0;
 int CodePerid;
 float distance;
 int i, j;
+uint8 ReadWord;
+int UStop;
 int arr_sum[8];
+double myangleOr,anglex,angle_mag,length_err;;
+int myanglex,myangleI,mydutyx;
 /******************************************************************************/
 /*----------------------------------用户函数------------------------------------*/
 /******************************************************************************/
 //函数及函数用法
-void motor_duty(int duty)//样例用户自身舵机函数
+void motor_duty(int duty)//鏍蜂緥鐢ㄦ埛鑷韩鑸垫満鍑芥暟
 {
+
     if (duty>0)
         SetMotor(FORWARD, duty);
     else
@@ -30,6 +36,7 @@ void motor_duty(int duty)//样例用户自身舵机函数
 }
 void steer_angle(int duty)
 {
+	duty+=12;
     if (duty>0)
         SetSteer(LEFT, duty);
     else if(duty<0)
@@ -38,9 +45,16 @@ void steer_angle(int duty)
         SetSteer(MIDDLE, duty);
 }
 
+double PIDsim(int mag)
+{
+	angle_mag = 20*(-mag/(267.6))/784;
+	anglex = asin(angle_mag);
+	return anglex;
+}
+
 /*****************************滤波算法*********************************/
 //对于电磁传感器的误差可以采取的滤波算法
-int* avg_filter(void) // 5次测量取平均值
+int* avg_filter(void) // 5娆℃祴閲忓彇骞冲潎鍊�
 {
     // Read multiple set of data to get average values
     int arr_data[8] = {0,0,0,0,0,0,0,0}, i, *p;
@@ -63,63 +77,47 @@ int* avg_filter(void) // 5次测量取平均值
     return arr_sum;
 }
 
+
 /*****************************电机驱动*********************************/
 // 无PID,无特殊位置决策
 void run(void)
 {
     avg_filter();
-    // 正常行驶
-    if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
+    // 姝ｅ父琛岄┒
+    if(UStop)
     {
-        motor_duty(-30);
-        steer_angle(60);
-    }
-    else if (arr_sum[2] > arr_sum[3] + 1600)
-    {
-        motor_duty(-30);
-        steer_angle(140);
-    }
-    else if (arr_sum[2] > arr_sum[3] + 2000)
-    {
-        motor_duty(-30);
-        steer_angle(200);
-    }
-    else if (arr_sum[3] > arr_sum[2] + 1000)
-    {
-        motor_duty(-30);
-        steer_angle(-60);
-    }
-    else if (arr_sum[3] > arr_sum[2] + 1600)
-    {
-        motor_duty(-30);
-        steer_angle(-140);
-    }
-    else if (arr_sum[3] > arr_sum[2] + 2000)
-    {
-        motor_duty(-30);
-        steer_angle(-200);
+    	myangleOr = PIDsim(arr_sum[3]-arr_sum[2])*(450);
+    	    myangleI = (int)myangleOr;
+    	    Bluetooth_Send_Data(myangleI);
+    	    mydutyx = 45 - (myangleI/3);
+    		motor_duty(-mydutyx);
+    		steer_angle(myangleI);
+    	    // 鐗规畩浣嶇疆
+    	    for (i = 0; i < 3; i ++)
+    	    {
+    	        UserInterupt10ms(); //鍗曟鎵ц鏃堕棿涓�50ms
+    	    }
     }
     else
-    {
-        steer_angle(0);
-        motor_duty(-30);
-    }
-    // 特殊位置
-    for (i = 0; i < 5; i ++)
-    {
-        UserInterupt10ms(); //单次执行时间为50ms
-    }
+    	motor_duty(0);
 }
 
 
 /*****************************主函数***********************************/
 //CPU0主函数，置于循环中用户主要逻辑计算区
-void UserCpu0Main(void) //样例：蓝牙遥控小车
+void UserCpu0Main(void) //鏍蜂緥锛氳摑鐗欓仴鎺у皬杞�
 {
     VADC_init();
     while(1)
     {
-        run();
+    	ReadWord=Bluetooth_Read_Data();
+    	if (ReadWord!=0)
+    		ctldata=ReadWord;
+    	if(ctldata=='O')
+    		UStop=1;
+    	else
+    		UStop=0;
+    	run();
     }
 }
 //CPU1主函数，置于循环中，摄像头读写由此核处理，建议用于摄像头相关计算：
