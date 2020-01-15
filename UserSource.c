@@ -50,7 +50,7 @@ int* avg_filter(void) // 5次测量取平均值
     }
     for (i = 0; i < 12; i ++)
     {
-        arr_data = VADCresult();
+        arr_data = VADCresult_run();
         for (j = 0; j < 8; j ++)
         {
             arr_sum[j] += arr_data[j];
