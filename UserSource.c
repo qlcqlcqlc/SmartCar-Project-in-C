@@ -4,7 +4,7 @@
 /******************************************************************************/
 #include "UserSource.h"
 #include "ServeSource.h"
-#include "VadcApp.c"
+#include "VadcApp.h"
 #include <stdio.h>
 #include <stdlib.h>
 int timecounter10=0;
@@ -67,7 +67,7 @@ int* avg_filter(void) // 5次测量取平均值
 // 无PID,无特殊位置决策
 void run(void)
 {
-    motor_duty(60); // 匀速80行驶
+    motor_duty(80); // 匀速80行驶
     avg_filter();
     // 正常行驶
     if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
@@ -83,6 +83,7 @@ void run(void)
         steer_angle(0);
     }
     // 特殊位置
+    if ()
     sleep(50); //单次执行时间为100ms
 }
 
