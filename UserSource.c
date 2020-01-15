@@ -73,7 +73,7 @@ void run(void)
     {
         steer_angle(20);
     }
-    else (arr_sum[3] > arr_sum[2] + 1000)
+    else if (arr_sum[3] > arr_sum[2] + 1000)
     {
         steer_angle(-20);
     }
