@@ -62,7 +62,7 @@ void VADC_init(void)
 }
 
 
-int* VADCresult_run(void)
+void VADCresult_run(void)
 {
     // wait for valid result
     Ifx_VADC_RES conversionResult;
@@ -70,14 +70,12 @@ int* VADCresult_run(void)
     IfxVadc_Adc_startScan(&adcGroup);
     // check results
     int chnIx;
-    int VADCresult[9];
     for(chnIx=0; chnIx<9; chnIx++) {
         do {
             conversionResult = IfxVadc_Adc_getResult(&adcChannel[chnIx]);
         } while( !conversionResult.B.VF );
         VADCresult[chnIx]=conversionResult.B.RESULT;
     }
-    return VADCresult;
 }
 
 
