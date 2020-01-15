@@ -71,13 +71,18 @@ void run(void)
     // 正常行驶
     if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
     {
-        motor_duty(-40);
+        motor_duty(-30);
         steer_angle(60);
     }
     else if (arr_sum[2] > arr_sum[3] + 1600)
     {
         motor_duty(-30);
-        steer_angle(100);
+        steer_angle(140);
+    }
+    else if (arr_sum[2] > arr_sum[3] + 2000)
+    {
+        motor_duty(-30);
+        steer_angle(200);
     }
     else if (arr_sum[3] > arr_sum[2] + 1000)
     {
@@ -87,12 +92,17 @@ void run(void)
     else if (arr_sum[3] > arr_sum[2] + 1600)
     {
         motor_duty(-30);
-        steer_angle(-100);
+        steer_angle(-140);
+    }
+    else if (arr_sum[3] > arr_sum[2] + 2000)
+    {
+        motor_duty(-30);
+        steer_angle(-200);
     }
     else
     {
         steer_angle(0);
-        motor_duty(-40);
+        motor_duty(-30);
     }
     // 特殊位置
     for (i = 0; i < 5; i ++)
