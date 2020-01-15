@@ -67,20 +67,32 @@ int* avg_filter(void) // 5次测量取平均值
 // 无PID,无特殊位置决策
 void run(void)
 {
-    motor_duty(80); // 匀速80行驶
     avg_filter();
     // 正常行驶
     if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
     {
-        steer_angle(20);
+        motor_duty(-40);
+        steer_angle(60);
     }
+    else if (arr_sum[2] > arr_sum[3] + 1600)
+    {
+        motor_duty(-30);
+        steer_angle(100);
+    }  
     else if (arr_sum[3] > arr_sum[2] + 1000)
     {
-        steer_angle(-20);
+        motor_duty(-40);
+        steer_angle(-60);
+    }
+    else if (arr_sum[3] > arr_sum[2] + 1600)
+    {
+        motor_duty(-60);
+        steer_angle(-100);
     }
     else
     {
         steer_angle(0);
+        motor_duty(-40);
     }
     // 特殊位置
     for (i = 0; i < 5; i ++)
@@ -88,12 +100,13 @@ void run(void)
         UserInterupt10ms(); //单次执行时间为50ms
     }
 }
-    
+
 
 /*****************************主函数***********************************/
 //CPU0主函数，置于循环中用户主要逻辑计算区
 void UserCpu0Main(void) //样例：蓝牙遥控小车
 {
+    VADC_init();
     while(1)
     {
         run();
