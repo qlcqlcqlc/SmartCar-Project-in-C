@@ -4,6 +4,7 @@
 /******************************************************************************/
 #include "UserSource.h"
 #include "ServeSource.h"
+#include "VadcApp.c"
 #include <stdio.h>
 #include <stdlib.h>
 int timecounter10=0;
@@ -15,6 +16,7 @@ uint8 ctldata=0;
 int CodePerid;
 float distance;
 int i, j;
+int arr_sum[8];
 /******************************************************************************/
 /*----------------------------------用户函数------------------------------------*/
 /******************************************************************************/
@@ -41,7 +43,11 @@ void steer_angle(int duty)
 int* avg_filter(void) // 5次测量取平均值
 {
     // Read multiple set of data to get average values
-    int arr_sum[8] = {0,0,0,0,0,0,0,0}, arr_data[8], i;
+    int arr_data[8], i;
+    for (i = 0; i < 8; i ++)
+    {
+        arr_sum[i] = 0;
+    }
     for (i = 0; i < 12; i ++)
     {
         arr_data = VADCresult();
@@ -61,14 +67,13 @@ int* avg_filter(void) // 5次测量取平均值
 // 无PID,无特殊位置决策
 void run(void)
 {
-    int filtered_arr[8];
     motor_duty(80); // 匀速80行驶
-    filtered_arr = avg_filter();
-    if (filtered_arr[2] > filtered_arr[3] + 1000) //转向阈值为1000
+    avg_filter();
+    if (arr_sum[2] > arr_sum[3] + 1000) //转向阈值为1000
     {
         steer_angle(20);
     }
-    else (filtered_arr[3] > filtered_arr[2] + 1000)
+    else (arr_sum[3] > arr_sum[2] + 1000)
     {
         steer_angle(-20);
     }
